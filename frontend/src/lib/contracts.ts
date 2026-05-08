@@ -10,10 +10,15 @@ export const VENTING_ERC20_ADDRESS =
 
 export const POLL_INTERVAL_MS = 30_000
 
-/** Format a raw token count (decimals=0) as a locale string */
-export function formatTokens(raw: bigint | undefined): string {
+/** Format a raw token amount respecting the token's decimals */
+export function formatTokens(raw: bigint | undefined, decimals = 0): string {
   if (raw === undefined) return '—'
-  return Number(raw).toLocaleString()
+  if (decimals === 0) return Number(raw).toLocaleString()
+  const factor = 10 ** decimals
+  return (Number(raw) / factor).toLocaleString(undefined, {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: Math.min(decimals, 6),
+  })
 }
 
 /** Percentage 0-100 of vested tokens */

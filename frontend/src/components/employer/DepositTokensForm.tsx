@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useAccount } from 'wagmi'
 import { useDebounce } from '../../hooks/useDebounce'
-import { useTokenBalance, useTokenAllowance, useContractBalance } from '../../hooks/useContractData'
+import { useTokenBalance, useTokenAllowance, useContractBalance, useTokenMeta } from '../../hooks/useContractData'
 import { useApprove, useDepositTokens } from '../../hooks/useContractActions'
 import { useInvalidateOnSuccess } from '../../hooks/useInvalidateOnSuccess'
 import { formatTokens } from '../../lib/contracts'
@@ -19,6 +19,7 @@ export default function DepositTokensForm() {
   const { data: walletBalance }   = useTokenBalance(address)
   const { data: allowance }       = useTokenAllowance(address)
   const { data: contractBalance } = useContractBalance()
+  const { symbol, decimals }      = useTokenMeta()
 
   const needsApproval = allowance !== undefined && amount > 0n && (allowance as bigint) < amount
 
@@ -43,30 +44,38 @@ export default function DepositTokensForm() {
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-      <h2 className="text-lg font-semibold text-gray-900 mb-1">Deposit Tokens</h2>
-      <p className="text-sm text-gray-500 mb-4">
-        Fund the vesting pool. Contract balance:{' '}
-        <span className="font-medium text-gray-800">{formatTokens(contractBalance as bigint | undefined)} VTK</span>
-      </p>
+    <div className="bg-zinc-900 rounded-2xl border border-zinc-800 p-6">
+      <h2 className="text-base font-semibold text-white mb-1">Deposit {symbol}</h2>
+      <p className="text-xs text-zinc-500 mb-5">Fund the vesting pool</p>
 
-      <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
-        Your wallet: <span className="font-medium text-gray-800">{formatTokens(walletBalance as bigint | undefined)} VTK</span>
+      <div className="grid grid-cols-2 gap-3 mb-5">
+        <div className="bg-zinc-800/60 rounded-xl p-3">
+          <p className="text-xs text-zinc-500 mb-0.5">Contract Balance</p>
+          <p className="text-sm font-semibold text-white tabular-nums">
+            {formatTokens(contractBalance as bigint | undefined, decimals)} {symbol}
+          </p>
+        </div>
+        <div className="bg-zinc-800/60 rounded-xl p-3">
+          <p className="text-xs text-zinc-500 mb-0.5">Your Wallet</p>
+          <p className="text-sm font-semibold text-white tabular-nums">
+            {formatTokens(walletBalance as bigint | undefined, decimals)} {symbol}
+          </p>
+        </div>
       </div>
 
       <form onSubmit={handleSubmit} className="flex gap-3">
         <input
           type="number"
           min="1"
-          placeholder="Amount"
+          placeholder="Amount to deposit"
           value={amountInput}
           onChange={(e) => setAmountInput(e.target.value)}
-          className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+          className="flex-1 bg-zinc-800 border border-zinc-700 text-zinc-100 placeholder-zinc-600 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500/50 transition"
         />
         <button
           type="submit"
           disabled={busy || amount <= 0n}
-          className="bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white px-5 py-2 rounded-lg text-sm font-medium transition"
+          className="bg-brand-600 hover:bg-brand-500 disabled:opacity-40 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition whitespace-nowrap"
         >
           {busy ? '…' : needsApproval ? 'Approve' : 'Deposit'}
         </button>

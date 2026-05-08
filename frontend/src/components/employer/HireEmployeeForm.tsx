@@ -2,16 +2,20 @@ import { useState } from 'react'
 import type { Address } from 'viem'
 import { isAddress } from 'viem'
 import { useDebounce } from '../../hooks/useDebounce'
-import { useAllEmployeeData, useContractBalance } from '../../hooks/useContractData'
+import { useAllEmployeeData, useContractBalance, useTokenMeta } from '../../hooks/useContractData'
 import { useHireEmployee } from '../../hooks/useContractActions'
 import { useInvalidateOnSuccess } from '../../hooks/useInvalidateOnSuccess'
 import { formatTokens } from '../../lib/contracts'
 import TxStatus from '../shared/TxStatus'
 
+const inputCls =
+  'w-full bg-zinc-800 border border-zinc-700 text-zinc-100 placeholder-zinc-600 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500/50 transition'
+const labelCls = 'block text-xs font-medium text-zinc-400 mb-1.5'
+
 export default function HireEmployeeForm() {
-  const [address, setAddress]         = useState('')
-  const [name, setName]               = useState('')
-  const [totalTokens, setTotalTokens] = useState('')
+  const [address, setAddress]           = useState('')
+  const [name, setName]                 = useState('')
+  const [totalTokens, setTotalTokens]   = useState('')
   const [joiningBonus, setJoiningBonus] = useState('0')
 
   const debouncedAddress = useDebounce(address, 400)
@@ -22,6 +26,7 @@ export default function HireEmployeeForm() {
 
   const { data: contractBalance } = useContractBalance()
   const { data: employeeData }    = useAllEmployeeData()
+  const { symbol, decimals }      = useTokenMeta()
 
   const totalPromised = ((employeeData ?? []) as unknown as { vestingInfo: { totalTokens: bigint; tokensVested: bigint } }[])
     .reduce((sum, emp) => sum + emp.vestingInfo.totalTokens - emp.vestingInfo.tokensVested, 0n)
@@ -51,9 +56,9 @@ export default function HireEmployeeForm() {
 
   if (isSuccess) {
     return (
-      <div className="bg-white rounded-xl shadow-sm border border-green-200 p-6 text-center">
-        <p className="text-green-700 font-medium mb-3">Employee hired successfully!</p>
-        <button onClick={reset} className="text-sm text-brand-600 hover:underline">
+      <div className="bg-zinc-900 rounded-2xl border border-emerald-500/20 p-6 text-center">
+        <p className="text-emerald-400 font-medium mb-3">Employee hired successfully!</p>
+        <button onClick={reset} className="text-sm text-brand-400 hover:text-brand-300 transition">
           Hire another
         </button>
       </div>
@@ -61,78 +66,78 @@ export default function HireEmployeeForm() {
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-      <h2 className="text-lg font-semibold text-gray-900 mb-4">Hire Employee</h2>
+    <div className="bg-zinc-900 rounded-2xl border border-zinc-800 p-6">
+      <h2 className="text-base font-semibold text-white mb-5">Hire Employee</h2>
 
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="sm:col-span-2">
-          <label className="block text-xs font-medium text-gray-600 mb-1">Wallet Address</label>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className={labelCls}>Wallet Address</label>
           <input
             type="text"
             placeholder="0x…"
             value={address}
             onChange={(e) => setAddress(e.target.value)}
-            className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500
-              ${address && !addressValid ? 'border-red-400' : 'border-gray-300'}`}
+            className={`${inputCls} ${address && !addressValid ? 'border-red-500/50 focus:ring-red-500/40' : ''}`}
           />
           {address && !addressValid && (
-            <p className="text-xs text-red-500 mt-1">Invalid address</p>
+            <p className="text-xs text-red-400 mt-1.5">Invalid Ethereum address</p>
           )}
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-gray-600 mb-1">Name</label>
+          <label className={labelCls}>Full Name</label>
           <input
             type="text"
             placeholder="Alice Smith"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+            className={inputCls}
           />
         </div>
 
-        <div>
-          <label className="block text-xs font-medium text-gray-600 mb-1">Total Tokens (VTK)</label>
-          <input
-            type="number"
-            min="1"
-            placeholder="10000"
-            value={totalTokens}
-            onChange={(e) => setTotalTokens(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs font-medium text-gray-600 mb-1">Joining Bonus (VTK)</label>
-          <input
-            type="number"
-            min="0"
-            placeholder="0"
-            value={joiningBonus}
-            onChange={(e) => setJoiningBonus(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
-          />
-          <p className="text-xs text-gray-400 mt-1">Transferred immediately at hire</p>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className={labelCls}>Total Tokens ({symbol})</label>
+            <input
+              type="number"
+              min="1"
+              placeholder="10000"
+              value={totalTokens}
+              onChange={(e) => setTotalTokens(e.target.value)}
+              className={inputCls}
+            />
+          </div>
+          <div>
+            <label className={labelCls}>Joining Bonus ({symbol})</label>
+            <input
+              type="number"
+              min="0"
+              placeholder="0"
+              value={joiningBonus}
+              onChange={(e) => setJoiningBonus(e.target.value)}
+              className={inputCls}
+            />
+            <p className="text-xs text-zinc-600 mt-1">Sent immediately at hire</p>
+          </div>
         </div>
 
         {wouldUnderfund && totalTokens && (
-          <div className="sm:col-span-2 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 text-sm text-amber-800">
-            Pool only has <strong>{formatTokens(contractBalance as bigint | undefined)} VTK</strong> available
-            after existing commitments. This allocation would exceed it by{' '}
-            <strong>{formatTokens(0n - availableAfterHire!)} VTK</strong> — deposit more tokens first.
+          <div className="bg-amber-500/5 border border-amber-500/20 rounded-lg px-4 py-3 text-sm text-amber-400">
+            Pool only has{' '}
+            <strong className="text-amber-300">
+              {formatTokens(contractBalance as bigint | undefined, decimals)} {symbol}
+            </strong>{' '}
+            available after existing commitments. Deposit more tokens first.
           </div>
         )}
 
-        <div className="sm:col-span-2">
-          <button
-            type="submit"
-            disabled={busy || !addressValid || !name || !totalTokens}
-            className="w-full bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white py-2.5 rounded-lg text-sm font-medium transition"
-          >
-            {busy ? 'Submitting…' : 'Hire Employee'}
-          </button>
-        </div>
+        <button
+          type="submit"
+          disabled={busy || !addressValid || !name || !totalTokens}
+          className="w-full bg-brand-600 hover:bg-brand-500 disabled:opacity-40 text-white py-2.5 rounded-lg text-sm font-medium transition"
+        >
+          {busy ? 'Submitting…' : 'Hire Employee'}
+        </button>
       </form>
 
       <TxStatus isPending={isPending} isConfirming={isConfirming} isSuccess={false} error={error} />

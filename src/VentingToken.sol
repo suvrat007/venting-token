@@ -6,53 +6,30 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 contract VentingToken {
     // ───────────────────── Events ─────────────────────
 
-    event Venting_EmployeeHired(
-        address indexed employeeAddress,
-        string name,
-        uint256 hireDate,
-        uint256 totalTokens
-    );
+    event Venting_EmployeeHired(address indexed employeeAddress, string name, uint256 hireDate, uint256 totalTokens);
 
-    event Venting_EmployeeFired(
-        address indexed employeeAddress,
-        uint256 fireDate,
-        uint256 claimedOnFire
-    );
+    event Venting_EmployeeFired(address indexed employeeAddress, uint256 fireDate, uint256 claimedOnFire);
 
-    event Venting_EmployeeClaimed(
-        address indexed employeeAddress,
-        uint256 amount,
-        uint256 claimTime
-    );
+    event Venting_EmployeeClaimed(address indexed employeeAddress, uint256 amount, uint256 claimTime);
 
-    event Venting_TokensDeposited(
-        address indexed depositor,
-        uint256 amount
-    );
+    event Venting_TokensDeposited(address indexed depositor, uint256 amount);
 
-    event Venting_NotOwnerAttemptedAccess(
-        address indexed attemptedBy,
-        uint256 attemptDate
-    );
+    event Venting_NotOwnerAttemptedAccess(address indexed attemptedBy, uint256 attemptDate);
 
-    event Venting_ScheduleSet(
-        address indexed employeeAddress,
-        uint256[] durations,
-        uint256[] percentages
-    );
+    event Venting_ScheduleSet(address indexed employeeAddress, uint256[] durations, uint256[] percentages);
 
     // ───────────────────── Structs ─────────────────────
 
     struct VestingSchedule {
-        uint256 cliffDuration;           // first milestone acts as cliff
-        uint256[] vestingMilestones;     // durations from hire date (e.g. 365 days, 3*365 days)
-        uint256[] vestingPercentages;    // cumulative % that vest at each milestone (must sum to 100)
+        uint256 cliffDuration; // first milestone acts as cliff
+        uint256[] vestingMilestones; // durations from hire date (e.g. 365 days, 3*365 days)
+        uint256[] vestingPercentages; // cumulative % that vest at each milestone (must sum to 100)
     }
 
     struct TokenVestingInfo {
-        uint256 totalTokens;       // total tokens allocated to this employee
-        uint256 tokensVested;      // tokens already transferred (joining bonus + prior claims)
-        uint256 vestingStartDate;  // timestamp vesting begins (= hireDate)
+        uint256 totalTokens; // total tokens allocated to this employee
+        uint256 tokensVested; // tokens already transferred (joining bonus + prior claims)
+        uint256 vestingStartDate; // timestamp vesting begins (= hireDate)
         VestingSchedule schedule;
     }
 
@@ -111,22 +88,17 @@ contract VentingToken {
 
     // ───────────────────── Core Logic ─────────────────────
 
-    function hireEmployee(
-        address employeeAddress,
-        string memory name,
-        uint256 totalTokens,
-        uint256 joiningToken
-    ) public onlyOwner {
+    function hireEmployee(address employeeAddress, string memory name, uint256 totalTokens, uint256 joiningToken)
+        public
+        onlyOwner
+    {
         require(employeeAddress != address(0), "Invalid employee address");
         require(employeeAddress != i_owner, "Owner cannot be hired");
         require(employees[employeeAddress].employeeAddress == address(0), "Already hired");
         require(bytes(name).length > 0, "Name required");
         require(totalTokens > 0, "Must allocate tokens");
         require(joiningToken <= totalTokens, "Joining token exceeds total");
-        require(
-            i_token.balanceOf(address(this)) >= joiningToken,
-            "Insufficient balance for joining bonus"
-        );
+        require(i_token.balanceOf(address(this)) >= joiningToken, "Insufficient balance for joining bonus");
 
         uint256 employeeId = s_employeeCount++;
         totalEmployees[employeeId] = employeeAddress;
@@ -176,11 +148,10 @@ contract VentingToken {
 
     // ───────────────────── Vesting Configuration ─────────────────────
 
-    function setVestingSchedule(
-        address employeeAddress,
-        uint256[] calldata durations,
-        uint256[] calldata percentages
-    ) external onlyOwner {
+    function setVestingSchedule(address employeeAddress, uint256[] calldata durations, uint256[] calldata percentages)
+        external
+        onlyOwner
+    {
         require(employeeAddress != address(0), "Invalid employee");
         require(durations.length == percentages.length, "Length mismatch");
         require(durations.length > 0, "Empty schedule");

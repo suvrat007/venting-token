@@ -6,16 +6,13 @@ import {VentingERC20} from "../src/VentingERC20.sol";
 import {VentingToken} from "../src/VentingToken.sol";
 
 contract DeployVentingToken is Script {
-    // Deployment parameters — override via environment variables if needed
-    string constant EMPLOYER_NAME  = "Venting Inc.";
-    string constant TOKEN_NAME     = "Venting Token";
-    string constant TOKEN_SYMBOL   = "VTK";
+    string constant EMPLOYER_NAME = "Venting Inc.";
+    string constant TOKEN_NAME = "Venting Token";
+    string constant TOKEN_SYMBOL = "VTK";
     uint256 constant INITIAL_SUPPLY = 10_000_000; // 10 million whole tokens (decimals = 0)
 
     function run() external returns (VentingERC20 erc20, VentingToken ventingToken) {
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-
-        vm.startBroadcast(deployerPrivateKey);
+        vm.startBroadcast();
 
         // 1. Deploy the ERC20 token — minted to deployer
         erc20 = new VentingERC20(TOKEN_NAME, TOKEN_SYMBOL, INITIAL_SUPPLY);
@@ -28,9 +25,9 @@ contract DeployVentingToken is Script {
 
         vm.stopBroadcast();
 
-        console.log("VentingERC20 deployed to :", address(erc20));
-        console.log("VentingToken deployed to  :", address(ventingToken));
-        console.log("Owner                     :", ventingToken.i_owner());
-        console.log("Contract token balance    :", erc20.balanceOf(address(ventingToken)));
+        console.log("VentingERC20 deployed to:", address(erc20));
+        console.log("VentingToken deployed to:", address(ventingToken));
+        console.log("Owner:", ventingToken.i_owner());
+        console.log("Contract token balance:", erc20.balanceOf(address(ventingToken)));
     }
 }

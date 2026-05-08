@@ -55,12 +55,17 @@ export function useTokenAllowance(owner: Address | undefined) {
   })
 }
 
-export function useTokenSymbol() {
-  return useReadContract({
-    address: VENTING_ERC20_ADDRESS,
-    abi: VENTING_ERC20_ABI,
-    functionName: 'symbol',
+export function useTokenMeta() {
+  const { data } = useReadContracts({
+    contracts: [
+      { address: VENTING_ERC20_ADDRESS, abi: VENTING_ERC20_ABI, functionName: 'symbol' },
+      { address: VENTING_ERC20_ADDRESS, abi: VENTING_ERC20_ABI, functionName: 'decimals' },
+    ],
   })
+  return {
+    symbol:   (data?.[0]?.result as string | undefined) ?? '…',
+    decimals: (data?.[1]?.result as number | undefined) ?? 0,
+  }
 }
 
 // ── Employee list (bulk) ─────────────────────────────────────────────────────

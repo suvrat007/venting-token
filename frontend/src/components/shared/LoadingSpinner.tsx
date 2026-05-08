@@ -21,7 +21,7 @@ export default function LoadingSpinner({ size = 'md', label }: Props) {
           d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
         />
       </svg>
-      {label && <span className="text-sm text-gray-500">{label}</span>}
+      {label && <span className="text-sm text-zinc-500">{label}</span>}
     </div>
   )
 }

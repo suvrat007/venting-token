@@ -183,8 +183,12 @@ contract VentingTokenTest is Test {
 
         uint256[] memory durations = new uint256[](3);
         uint256[] memory percentages = new uint256[](3);
-        durations[0] = 365 days; durations[1] = 3 * 365 days; durations[2] = 5 * 365 days;
-        percentages[0] = 10; percentages[1] = 50; percentages[2] = 100;
+        durations[0] = 365 days;
+        durations[1] = 3 * 365 days;
+        durations[2] = 5 * 365 days;
+        percentages[0] = 10;
+        percentages[1] = 50;
+        percentages[2] = 100;
 
         vm.prank(employee1);
         vm.expectRevert("Only owner can call this function");
@@ -197,8 +201,12 @@ contract VentingTokenTest is Test {
 
         uint256[] memory durations = new uint256[](3);
         uint256[] memory percentages = new uint256[](3);
-        durations[0] = 365 days; durations[1] = 3 * 365 days; durations[2] = 5 * 365 days;
-        percentages[0] = 10; percentages[1] = 50; percentages[2] = 100;
+        durations[0] = 365 days;
+        durations[1] = 3 * 365 days;
+        durations[2] = 5 * 365 days;
+        percentages[0] = 10;
+        percentages[1] = 50;
+        percentages[2] = 100;
 
         ventingToken.setVestingSchedule(employee1, durations, percentages);
         vm.stopPrank();
@@ -230,8 +238,12 @@ contract VentingTokenTest is Test {
         uint256[] memory durations = new uint256[](3);
         uint256[] memory percentages = new uint256[](3);
         // durations[1] == durations[0] — not strictly increasing
-        durations[0] = 365 days; durations[1] = 365 days; durations[2] = 730 days;
-        percentages[0] = 30; percentages[1] = 60; percentages[2] = 100;
+        durations[0] = 365 days;
+        durations[1] = 365 days;
+        durations[2] = 730 days;
+        percentages[0] = 30;
+        percentages[1] = 60;
+        percentages[2] = 100;
 
         vm.prank(owner);
         vm.expectRevert("Durations must be increasing");
@@ -244,8 +256,10 @@ contract VentingTokenTest is Test {
 
         uint256[] memory durations = new uint256[](2);
         uint256[] memory percentages = new uint256[](2);
-        durations[0] = 365 days; durations[1] = 2 * 365 days;
-        percentages[0] = 50; percentages[1] = 100;
+        durations[0] = 365 days;
+        durations[1] = 2 * 365 days;
+        percentages[0] = 50;
+        percentages[1] = 100;
 
         vm.prank(owner);
         vm.expectEmit(true, false, false, false);
@@ -259,9 +273,11 @@ contract VentingTokenTest is Test {
 
         uint256[] memory durations = new uint256[](2);
         uint256[] memory percentages = new uint256[](2);
-        durations[0] = 365 days; durations[1] = 2 * 365 days;
+        durations[0] = 365 days;
+        durations[1] = 2 * 365 days;
         // Cumulative percentages: final value must be 100 — 80 is invalid
-        percentages[0] = 40; percentages[1] = 80;
+        percentages[0] = 40;
+        percentages[1] = 80;
 
         vm.prank(owner);
         vm.expectRevert("Percentages must sum to 100");
@@ -323,8 +339,12 @@ contract VentingTokenTest is Test {
 
         uint256[] memory durations = new uint256[](3);
         uint256[] memory percentages = new uint256[](3);
-        durations[0] = 1 days; durations[1] = 2 days; durations[2] = 3 days;
-        percentages[0] = 20; percentages[1] = 50; percentages[2] = 100;
+        durations[0] = 1 days;
+        durations[1] = 2 days;
+        durations[2] = 3 days;
+        percentages[0] = 20;
+        percentages[1] = 50;
+        percentages[2] = 100;
 
         ventingToken.setVestingSchedule(employee1, durations, percentages);
         vm.stopPrank();
@@ -343,7 +363,7 @@ contract VentingTokenTest is Test {
         vm.prank(employee1);
         ventingToken.claimVestedTokens();
 
-        (, ,, vestingInfo) = ventingToken.employees(employee1);
+        (,,, vestingInfo) = ventingToken.employees(employee1);
         assertEq(vestingInfo.tokensVested, 5000);
         assertEq(token.balanceOf(employee1), 5000);
     }
@@ -354,15 +374,16 @@ contract VentingTokenTest is Test {
 
         uint256[] memory durations = new uint256[](2);
         uint256[] memory percentages = new uint256[](2);
-        durations[0] = 1 days; durations[1] = 2 days;
-        percentages[0] = 50; percentages[1] = 100;
+        durations[0] = 1 days;
+        durations[1] = 2 days;
+        percentages[0] = 50;
+        percentages[1] = 100;
 
         ventingToken.setVestingSchedule(employee1, durations, percentages);
         vm.stopPrank();
 
         // Before cliff
-        (uint256 totalTokens, uint256 tokensVested, uint256 claimable,,) =
-            ventingToken.getVestingStatus(employee1);
+        (uint256 totalTokens, uint256 tokensVested, uint256 claimable,,) = ventingToken.getVestingStatus(employee1);
         assertEq(totalTokens, 10_000);
         assertEq(tokensVested, 500);
         assertEq(claimable, 0);
